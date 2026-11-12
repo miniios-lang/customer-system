@@ -1,0 +1,355 @@
+/* ==========================================================================
+   登录页 —— 严格对照「来也 UiBot RPA 中级认证生产管理系统 -- 登录」的 DOM
+   结构：.App > #main.com-main > .produce-manager > .produce-manager-login
+         > .com-container > (.logo + .form) ，页脚 .com-footer 通栏黑底。
+   尺寸/颜色取 antd 4：输入框 lg 高 40、圆角 2、主色 #1890ff、文本 .85 黑。
+   ========================================================================== */
+
+.login-page {
+  margin: 0;
+  min-height: 100vh;
+  background: #f6f6f6;
+  color: rgba(0, 0, 0, .85);
+  font: 14px/1.5715 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.login-page *,
+.login-page *::before,
+.login-page *::after { box-sizing: border-box; }
+
+/* 旧版（style.css:527）用 ::before 做水印，这里关掉，改由 .wm 文本块承担 */
+.login-page::before { content: none !important; }
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- 主区：竖直居中，背景平铺水印 ---------- */
+.com-main {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  overflow: hidden;
+}
+
+/* 斜向平铺的品牌水印：真站是 CSS 背景图，这里用一组文本块还原同样的观感 */
+.wm {
+  position: absolute;
+  inset: -30%;
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  align-content: center;
+  justify-content: center;
+  gap: 96px 132px;
+  transform: rotate(-18deg);
+  color: rgba(24, 144, 255, .06);
+  font-size: 20px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.produce-manager,
+.produce-manager-login { position: relative; z-index: 1; }
+
+.produce-manager-login {
+  width: 400px;
+  max-width: 100%;
+  padding: 40px 32px 32px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .07), 0 0 1px rgba(0, 0, 0, .04);
+}
+
+/* ---------- 顶部 logo：来也标记 + UiBot 字标 ---------- */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.logo-laiye {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #1890ff, #0b63ce);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.logo-uibot {
+  display: block;
+  height: 35px;              /* 原图 148×35，等比 */
+  width: auto;
+}
+
+/* ---------- 标题 ---------- */
+.form-head {
+  margin-bottom: 26px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, .85);
+}
+
+/* ---------- 表单项 ---------- */
+.ant-form-item {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.ant-form-item:last-child { margin-bottom: 0; }
+
+.ant-input {
+  width: 100%;
+  height: 40px;
+  padding: 6px 11px;
+  font-size: 16px;
+  line-height: 1.5715;
+  color: rgba(0, 0, 0, .85);
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.ant-input::placeholder { color: #bfbfbf; }
+
+.ant-input:hover { border-color: #40a9ff; }
+
+.ant-input:focus {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, .2);
+}
+
+.ant-form-item.has-err .ant-input { border-color: #ff4d4f; }
+
+.ant-form-item.has-err .ant-input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, .2);
+}
+
+/* 错误提示：antd 的 explain-error，12px 红字，紧贴输入框下方 */
+.err-text {
+  display: none;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5715;
+  color: #ff4d4f;
+}
+
+.ant-form-item.has-err .err-text { display: block; }
+
+/* ---------- 密码框：带眼睛开关 ---------- */
+.ant-input-affix-wrapper {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 0 0 11px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.ant-input-affix-wrapper:hover { border-color: #40a9ff; }
+
+.ant-input-affix-wrapper:focus-within {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, .2);
+}
+
+.ant-input-affix-wrapper .ant-input {
+  flex: 1 1 auto;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.ant-form-item.has-err .ant-input-affix-wrapper { border-color: #ff4d4f; }
+
+.ant-input-suffix {
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
+  color: rgba(0, 0, 0, .45);
+  cursor: pointer;
+}
+
+.ant-input-suffix:hover { color: rgba(0, 0, 0, .75); }
+.ant-input-suffix .eye-slash { display: block; }
+.ant-input-suffix.is-on .eye-slash { display: none; }
+
+/* ---------- 验证码行：输入框 2 份 + 图 1 份（antd col-16 / col-8） ---------- */
+.captcha-row {
+  display: flex;
+  align-items: center;
+  margin: 0 -6px;
+}
+
+.captcha-col-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 6px;
+}
+
+.captcha-col-img {
+  flex: 0 0 92px;
+  padding: 0 6px;
+}
+
+/* 码框固定 80×40（2:1）。边框用 box-shadow，避免 border 吃掉 2px
+   把 100% 的画布拉成 78×38（2.05:1）。 */
+.captcha-box {
+  position: relative;
+  box-sizing: content-box;
+  width: 80px;
+  height: 40px;
+  border: 0;
+  box-shadow: 0 0 0 1px #d9d9d9;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #f7fbff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.captcha-box canvas,
+.captcha-box img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 2;
+}
+
+.captcha-box img { display: none; object-fit: fill; }
+.captcha-box.api-mode img { display: block; }
+.captcha-box.api-mode canvas { display: none; }
+.captcha-box.api-mode .captcha-ph { display: none; }
+
+.captcha-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.captcha-bg path {
+  fill: none;
+  stroke: rgba(24, 144, 255, .22);
+  stroke-width: 1.2;
+}
+
+.captcha-ph {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  font: 700 15px/1 "Courier New", Consolas, monospace;
+  color: rgba(0, 0, 0, .35);
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.captcha-ph i { display: inline-block; font-style: normal; }
+
+.captcha-box.no-canvas { background: #f4f9ff; }
+.captcha-box.no-canvas canvas { display: none; }
+.captcha-box.no-canvas .captcha-ph { color: #0b63ce; }
+
+/* ---------- 提交按钮 ---------- */
+.ant-btn {
+  width: 100%;
+  height: 40px;
+  padding: 0 15px;
+  font-size: 16px;
+  line-height: 1.5715;
+  color: #fff;
+  background: #1890ff;
+  border: 1px solid #1890ff;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+
+.ant-btn:hover { background: #40a9ff; border-color: #40a9ff; }
+.ant-btn:active { background: #096dd9; border-color: #096dd9; }
+.ant-btn[disabled] { background: #b6dcff; border-color: #b6dcff; cursor: not-allowed; }
+.ant-btn span { letter-spacing: 2px; }
+
+/* ---------- 登录按钮下方的演示凭据提示 ---------- */
+.cred-tip {
+  margin: 16px 0 0;
+  padding: 7px 10px;
+  border: 1px dashed #d6e4ff;
+  border-radius: 2px;
+  background: #f5f9ff;
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: .2px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.cred-tip b {
+  color: #1890ff;
+  font-weight: 600;
+  font-family: Consolas, "Courier New", monospace;
+  letter-spacing: 0;
+}
+
+/* ---------- 页脚：通栏黑底 ---------- */
+.com-footer {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 14px 16px 12px;
+  background: #000;
+  text-align: center;
+}
+
+.com-footer p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 2;
+  color: rgba(255, 255, 255, .65);
+}
+
+.com-footer a {
+  color: rgba(255, 255, 255, .65);
+  text-decoration: none;
+}
+
+.com-footer a:hover { color: #fff; }
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 480px) {
+  .com-main { padding: 24px 12px; }
+  .produce-manager-login { padding: 28px 20px 24px; }
+  .form-head { font-size: 18px; }
+  .wm { font-size: 15px; gap: 64px 88px; }
+}

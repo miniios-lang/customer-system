@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>来也 UiBot RPA 中级认证生产管理系统 -- 登录</title>
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/login.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231890ff'/%3E%3Ctext x='16' y='22' font-size='16' font-family='Arial' fill='%23fff' text-anchor='middle'%3EU%3C/text%3E%3C/svg%3E" />
+</head>
+<body class="login-page">
+
+<div class="App">
+  <div id="main" class="com-main">
+    <!-- 斜向平铺水印（真站为 CSS 背景图，这里用文本块还原观感） -->
+    <div class="wm" aria-hidden="true">
+      <span>来也科技认证专用网站</span><span>来也科技认证专用网站</span><span>来也科技认证专用网站</span>
+      <span>来也科技认证专用网站</span><span>来也科技认证专用网站</span><span>来也科技认证专用网站</span>
+      <span>来也科技认证专用网站</span><span>来也科技认证专用网站</span><span>来也科技认证专用网站</span>
+      <span>来也科技认证专用网站</span><span>来也科技认证专用网站</span><span>来也科技认证专用网站</span>
+      <span>来也科技认证专用网站</span><span>来也科技认证专用网站</span><span>来也科技认证专用网站</span>
+    </div>
+
+    <div class="produce-manager">
+      <div class="produce-manager-login">
+        <div class="com-container">
+
+          <div class="logo">
+            <span class="logo-laiye" aria-hidden="true">来也</span>
+            <img class="logo-uibot" src="assets/logo-uibot.png" alt="UiBot" />
+          </div>
+
+          <div class="form">
+            <div class="form-head">生产管理系统 - 登录</div>
+            <div class="form-body">
+              <form id="loginForm" class="ant-form ant-form-horizontal ant-form-large" autocomplete="off" novalidate>
+
+                <div class="ant-form-item" id="fUser">
+                  <div class="ant-form-item-control-input">
+                    <div class="ant-form-item-control-input-content">
+                      <input id="username" name="username" type="text" maxlength="20"
+                             placeholder="请输入用户名" aria-required="true"
+                             class="ant-input ant-input-lg" />
+                    </div>
+                  </div>
+                  <div class="err-text">请输入用户名</div>
+                </div>
+
+                <div class="ant-form-item" id="fPwd">
+                  <div class="ant-form-item-control-input">
+                    <div class="ant-form-item-control-input-content">
+                      <span class="ant-input-affix-wrapper ant-input-password ant-input-affix-wrapper-lg">
+                        <input id="password" name="password" type="password" maxlength="30"
+                               placeholder="请输入密码" aria-required="true"
+                               class="ant-input ant-input-lg" />
+                        <span class="ant-input-suffix" id="eyeToggle" role="img"
+                              aria-label="eye-invisible" tabindex="-1" title="显示/隐藏密码">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                               stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                               aria-hidden="true">
+                            <path d="M1.8 12S5.9 5.6 12 5.6 22.2 12 22.2 12 18.1 18.4 12 18.4 1.8 12 1.8 12Z" />
+                            <circle cx="12" cy="12" r="3.1" />
+                            <path class="eye-slash" d="M3.4 3.4 20.6 20.6" />
+                          </svg>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="err-text">请输入密码</div>
+                </div>
+
+                <div class="ant-form-item" id="fCode">
+                  <div class="ant-form-item-control-input">
+                    <div class="ant-form-item-control-input-content">
+                      <div id="validCode" class="captcha-row" aria-required="true">
+                        <div class="captcha-col-input">
+                          <input id="captcha" name="captcha" type="text" maxlength="10"
+                                 placeholder="请输入验证码" class="ant-input ant-input-lg" />
+                        </div>
+                        <div class="captcha-col-img">
+                          <div class="captcha-box" id="captchaBox" title="点击更换图片"
+                               role="img" aria-label="图形验证码">
+                            <svg class="captcha-bg" viewBox="0 0 80 40" aria-hidden="true" focusable="false">
+                              <path d="M-3 10 C 16 2, 40 22, 82 7" />
+                              <path d="M-3 28 C 20 20, 48 36, 82 22" />
+                              <path d="M8 -3 C 20 20, 36 6, 52 42" />
+                            </svg>
+                            <img id="captchaImg" alt="验证码" />
+                            <canvas id="captchaCanvas" width="80" height="40"></canvas>
+                            <span class="captcha-ph" id="captchaPh">点击刷新</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="err-text">验证码有误，请重新输入</div>
+                </div>
+
+                <div class="ant-form-item">
+                  <div class="ant-form-item-control-input">
+                    <div class="ant-form-item-control-input-content">
+                      <button type="submit" id="btnLogin"
+                              class="ant-btn ant-btn-primary ant-btn-lg ant-btn-block">
+                        <span>登 录</span>
+                      </button>
+                      <p class="cred-tip">用户名：<b>UiBot</b>　密码：<b>Pass_123</b></p>
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="com-footer">
+    <p>
+      Copyright©2026 来也科技（北京）有限公司　UiBot - 中国RPA的先驱，机器人流程自动化专家　<br />
+      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="nofollow">京ICP备12005413号-3</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     验证码双模：
+       · http(s) 下走接口 —— <img src="api/virtual_account_valid_code">，
+         与真实站点同构：图像服务端出，码与会话 Cookie 绑定
+       · file:// 或缺接口时退化为本地 canvas 绘制（离线也能用）
+     ------------------------------------------------------------------ */
+  var box = document.getElementById('captchaBox');
+  var img = document.getElementById('captchaImg');
+  var cv = document.getElementById('captchaCanvas');
+  var ph = document.getElementById('captchaPh');
+  var HTTP = location.protocol === 'http:' || location.protocol === 'https:';
+  var mode = 'canvas';   /* 先本地画；探到 api/ping 才升级成服务端出图（静态托管永远探不到） */
+  var ctx = null;
+  try { ctx = cv && cv.getContext ? cv.getContext('2d') : null; } catch (e) { ctx = null; }
+
+  var POOL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var SHADES = ['#0b63ce', '#0f7b8a', '#5b3fb5', '#a1457a'];
+  var LINE_COLORS = ['rgba(24,144,255,.35)', 'rgba(15,123,138,.30)',
+                     'rgba(91,63,181,.26)', 'rgba(161,69,122,.30)',
+                     'rgba(60,60,60,.20)'];
+  /* 每个字符固定占位：80px 宽里 4 个字、20px 一档，逐字单独旋转 —— 生成与绘制不写循环语句 */
+  var SLOTS = [10, 30, 50, 70];
+  var code = '';
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+  function pickChar() { return POOL.charAt(Math.floor(Math.random() * POOL.length)); }
+  function rgba(r, g, b, a) { return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
+
+  function setMode(next) {
+    mode = next;
+    if (!box) return;
+    if (next === 'api') { box.classList.add('api-mode'); box.classList.remove('no-canvas'); return; }
+    box.classList.remove('api-mode');
+    if (img) { img.removeAttribute('src'); }
+  }
+
+  /* —— 接口模式 —— */
+  function refreshApi() {
+    if (!img) return;
+    img.onload = function () { if (ph) ph.textContent = ''; };
+    img.onerror = function () { setMode('canvas'); drawCaptcha(); };
+    img.src = 'api/virtual_account_valid_code?t=' + Date.now();
+  }
+
+  /* 是不是我们自己那个 python 服务？只有它才会回 api/ping 的 JSON。
+     探不到（Cloudflare Pages / GitHub Pages / 任意静态托管）就一直用本地 canvas，
+     一次多余的 /api 请求都不再发。 */
+  function probeApi(cb) {
+    if (!HTTP || typeof fetch !== 'function') { cb(false); return; }
+    var settled = false;
+    var timer = setTimeout(function () { if (!settled) { settled = true; cb(false); } }, 1500);
+    fetch('api/ping', { cache: 'no-store', headers: { Accept: 'application/json' } })
+      .then(function (r) {
+        var ct = r.headers.get('content-type') || '';
+        return r.ok && /json/i.test(ct) ? r.json() : null;
+      })
+      .then(function (j) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        cb(!!(j && j.server === 'cs'));
+      })
+      .catch(function () {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        cb(false);
+      });
+  }
+
+  /* —— canvas 兜底 —— */
+  function glyphsHtml() {
+    return code.split('').map(function (ch, i) {
+      var deg = (i % 2 ? 1 : -1) * (8 + i * 2);
+      var dy = i % 2 ? 1 : -1;
+      return '<i style="transform:rotate(' + deg + 'deg) translateY(' + dy + 'px)">' + ch + '</i>';
+    }).join('');
+  }
+
+  function useDomFallback() {
+    if (!box || !ph) return;
+    box.classList.add('no-canvas');
+    ph.innerHTML = glyphsHtml();
+  }
+
+  function canvasUsable() {
+    if (!ctx) return false;
+    try {
+      if (cv.getBoundingClientRect && cv.getBoundingClientRect().width < 10) return false;
+      var d = ctx.getImageData(0, 0, 1, 1).data;
+      return d[3] > 0;                 /* 画过底一定有 alpha，没画过是 0 */
+    } catch (e) {
+      return false;                    /* 取不到像素也走兜底 */
+    }
+  }
+
+  function drawCaptcha() {
+    code = [0, 1, 2, 3].map(pickChar).join('');
+    if (!ctx) { useDomFallback(); return; }
+
+    var w = 80, h = 40, dpr = window.devicePixelRatio || 1;
+    try {
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.fillStyle = '#f4f9ff';
+      ctx.fillRect(0, 0, w, h);
+      [0, 1, 2].map(function () {
+        ctx.fillStyle = rgba(24, 120, 200, 0.05);
+        ctx.beginPath();
+        ctx.arc(rand(0, w), rand(0, h), rand(8, 16), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      [0, 1, 2, 3, 4].map(function (i) {
+        ctx.beginPath();
+        ctx.strokeStyle = LINE_COLORS[i];
+        ctx.lineWidth = rand(0.7, 1.3);
+        ctx.moveTo(rand(-3, 6), rand(4, h - 4));
+        ctx.bezierCurveTo(rand(16, 34), rand(-5, h + 5), rand(46, 64), rand(-5, h + 5),
+                          rand(w - 6, w), rand(4, h - 4));
+        ctx.stroke();
+      });
+
+      code.split('').map(function (ch, i) {
+        ctx.save();
+        ctx.translate(SLOTS[i] + rand(-1, 1), 27 + rand(-2, 2));
+        ctx.rotate(rand(-0.26, 0.26));
+        ctx.font = 'bold ' + Math.round(rand(16, 20)) + 'px "Courier New", Consolas, monospace';
+        ctx.fillStyle = SHADES[i % SHADES.length];
+        ctx.globalAlpha = 0.92;
+        ctx.fillText(ch, -5, 0);
+        ctx.restore();
+      });
+
+      ctx.beginPath();
+      ctx.strokeStyle = rgba(40, 40, 60, 0.35);
+      ctx.lineWidth = 1.1;
+      ctx.moveTo(0, h / 2 + rand(-3, 3));
+      ctx.lineTo(w, h / 2 + rand(-3, 3));
+      ctx.stroke();
+
+      Array.apply(null, Array(45)).map(function () {
+        ctx.fillStyle = rgba(20, 20, 40, rand(0.12, 0.42).toFixed(2));
+        ctx.fillRect(rand(0, w), rand(0, h), rand(0.7, 1.8), rand(0.7, 1.8));
+      });
+    } catch (e) {
+      useDomFallback();
+      return;
+    }
+
+    if (!canvasUsable()) { useDomFallback(); return; }
+
+    box.classList.remove('no-canvas');
+    ph.textContent = '';
+  }
+
+  function refresh() {
+    if (mode === 'api') refreshApi();
+    else drawCaptcha();
+  }
+
+  if (box) box.addEventListener('click', refresh);
+  setMode(mode);
+  refresh();
+  probeApi(function (ok) {
+    if (!ok) return;                 /* 静态托管：本地码直接可用，不做任何 API 调用 */
+    setMode('api');
+    refreshApi();
+  });
+
+  /* —— 密码可见性开关（对应真站的 eye-invisible 图标） —— */
+  var eye = document.getElementById('eyeToggle');
+  if (eye) {
+    eye.addEventListener('click', function () {
+      var p = document.getElementById('password');
+      if (!p) return;
+      var show = p.type === 'password';
+      p.type = show ? 'text' : 'password';
+      eye.classList.toggle('is-on', show);
+      eye.setAttribute('aria-label', show ? 'eye' : 'eye-invisible');
+      p.focus();
+    });
+  }
+
+  var USER = 'UiBot';
+  var PASS = 'Pass_123';
+
+  function setErr(id, bad) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (bad) el.classList.add('has-err');
+    else el.classList.remove('has-err');
+  }
+
+  var ERRTEXT = { fUser: '请输入用户名', fPwd: '请输入密码', fCode: '验证码有误，请重新输入' };
+
+  function resetTexts() {
+    Object.keys(ERRTEXT).map(function (id) {
+      var el = document.querySelector('#' + id + ' .err-text');
+      if (el) el.textContent = ERRTEXT[id];
+    });
+  }
+
+  function go() {
+    try {
+      sessionStorage.setItem('cs_user', USER);
+      sessionStorage.setItem('cs_at', String(Date.now()));
+    } catch (e) { /* file:// 下个别浏览器禁用 storage */ }
+    setTimeout(function () { location.href = 'app.html'; }, 260);
+  }
+
+  function fail(tip) {
+    setErr('fCode', true);
+    document.getElementById('captcha').value = '';
+    refresh();
+    if (tip) {
+      var e = document.querySelector('#fCode .err-text');
+      if (e) e.textContent = tip;
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var u = document.getElementById('username').value.trim();
+    var p = document.getElementById('password').value;
+    var c = document.getElementById('captcha').value.trim().toUpperCase();
+    var btn = document.getElementById('btnLogin');
+
+    resetTexts();
+    setErr('fUser', u.length === 0);
+    setErr('fPwd', p.length === 0);
+    setErr('fCode', c.length === 0);
+    if (!u || !p || !c) return;
+
+    if (mode === 'api' && typeof fetch === 'function') {
+      btn.disabled = true;
+      fetch('api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p, code: c })
+      }).then(function (r) {
+        if (r.status === 404) throw new Error('no-api');
+        return r.json();
+      }).then(function (res) {
+        if (res.ok) { btn.innerHTML = '登录中…'; go(); return; }
+        btn.disabled = false;
+        if (res.reason === 'account') {
+          setErr('fUser', true);
+          setErr('fPwd', true);
+          refresh();
+          var e1 = document.querySelector('#fUser .err-text');
+          if (e1) e1.textContent = '用户名或密码不正确';
+          return;
+        }
+        fail('验证码有误，请重新输入');
+      }).catch(function () {
+        /* 没有接口（纯静态服务/直接双击）—— 退回本地校验 */
+        btn.disabled = false;
+        setMode('canvas');
+        drawCaptcha();
+        fail('接口不可用，已切换本地验证码，请重试');
+      });
+      return;
+    }
+
+    if (c !== code) { fail('验证码有误，请重新输入'); return; }
+    if (u !== USER || p !== PASS) {
+      setErr('fUser', true);
+      setErr('fPwd', true);
+      refresh();
+      var e2 = document.querySelector('#fUser .err-text');
+      if (e2) e2.textContent = '用户名或密码不正确';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '登录中…';
+    go();
+  });
+})();
+</script>
+</body>
+</html>
