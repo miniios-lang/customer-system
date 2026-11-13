@@ -41,14 +41,14 @@
       cols: [
         { key: 'orderNo',   title: '订单编码', width: 260, align: 'left' },
         { key: 'date',      title: '下单日期', width: 240, align: 'center', date: true },
-        { key: 'goodsCode', title: '商品码',   width: 240, align: 'left' },
+        { key: 'goodsCode', title: '商品编码', width: 240, align: 'left' },
         { key: 'custCode',  title: '客户编码', width: 240, align: 'left' },
         { key: 'qty',       title: '下单数量', width: 220, align: 'right', num: true }
       ],
       exportCols: [
         { key: 'orderNo',   title: '订单编码', width: 20, num: false },
         { key: 'date',      title: '下单日期', width: 16, num: false, date: true },
-        { key: 'goodsCode', title: '商品码',   width: 18, num: false },
+        { key: 'goodsCode', title: '商品编码', width: 18, num: false },
         { key: 'goodsName', title: '商品名称', width: 18, num: false },
         { key: 'custCode',  title: '客户编码', width: 18, num: false },
         { key: 'custName',  title: '客户名称', width: 30, num: false },
