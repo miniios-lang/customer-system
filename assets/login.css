@@ -323,6 +323,49 @@
   letter-spacing: 0;
 }
 
+/* —— 凭据一键复制 —— */
+.cred-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+.cred-gap {
+  display: inline-block;
+  width: 16px;
+}
+.cred-copy {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid #bae0ff;
+  border-radius: 2px;
+  background: #fff;
+  color: #1890ff;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.cred-copy:hover {
+  background: #e6f4ff;
+  border-color: #91caff;
+}
+.cred-copy:active {
+  transform: translateY(1px);
+}
+.cred-copy:focus-visible {
+  outline: 2px solid #91caff;
+  outline-offset: 1px;
+}
+.cred-copy.is-copied {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #389e0d;
+}
+
 /* ---------- 页脚：通栏黑底 ---------- */
 .com-footer {
   flex: 0 0 auto;

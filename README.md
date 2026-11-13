@@ -48,7 +48,10 @@ python -m http.server 8000
 pip install pillow
 ```
 
-**登录账号**：`UiBot` / `Pass_123`（登录页底部也印着）
+**登录账号**：`UiBot` / `Pass_123`（登录页底部也印着，每项右侧有「复制」按钮一键复制）
+
+> 改密码要同时改三处：`index.html` 里显示的 `<b>` 文本、同文件底部的 `var PASS`、
+> `server.py` 的 `ACCOUNTS`。`node test_login.js` 会检查这四处是否一致，改漏了会直接报错。
 
 ---
 

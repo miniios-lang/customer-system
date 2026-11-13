@@ -103,7 +103,22 @@
                               class="ant-btn ant-btn-primary ant-btn-lg ant-btn-block">
                         <span>登 录</span>
                       </button>
-                      <p class="cred-tip">用户名：<b>UiBot</b>　密码：<b>Pass_123</b></p>
+                      <!-- 凭据一键复制：按钮必须是 type="button"，
+                           默认的 submit 会让点击直接提交登录表单。
+                           data-copy 的值改了，记得同步改下面的 var PASS 和 server.py 的 ACCOUNTS。 -->
+                      <p class="cred-tip">
+                        <span class="cred-item">
+                          <span class="cred-label">用户名：</span><b>UiBot</b>
+                          <button type="button" class="cred-copy" data-copy="UiBot"
+                                  title="复制用户名" aria-label="复制用户名">复制</button>
+                        </span>
+                        <span class="cred-gap" aria-hidden="true"></span>
+                        <span class="cred-item">
+                          <span class="cred-label">密码：</span><b>Pass_123</b>
+                          <button type="button" class="cred-copy" data-copy="Pass_123"
+                                  title="复制密码" aria-label="复制密码">复制</button>
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -309,6 +324,57 @@
       p.focus();
     });
   }
+
+  /* —— 凭据一键复制 ——
+     优先用异步剪贴板 API（https / localhost 等安全上下文）；
+     file:// 下 navigator.clipboard 不可用，退回 textarea + execCommand，
+     保证双击打开 html 也能复制。 */
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) resolve(); else reject(new Error('execCommand copy failed'));
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  function flash(btn, text) {
+    if (btn._flashTimer) { clearTimeout(btn._flashTimer); }
+    if (btn._label === undefined) { btn._label = btn.textContent; }
+    btn.textContent = text;
+    btn._flashTimer = setTimeout(function () {
+      btn.textContent = btn._label;
+      btn.classList.remove('is-copied');
+      btn._flashTimer = null;
+    }, 1400);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.cred-copy'), function (btn) {
+    btn.addEventListener('click', function () {
+      var value = btn.getAttribute('data-copy') || '';
+      copyText(value).then(function () {
+        btn.classList.add('is-copied');
+        flash(btn, '已复制');
+      }).catch(function () {
+        flash(btn, '复制失败');
+      });
+    });
+  });
 
   var USER = 'UiBot';
   var PASS = 'Pass_123';

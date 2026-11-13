@@ -28,6 +28,14 @@ if (!m) {
 }
 const SCRIPT = m[1];
 
+/* 从真实文件里取凭据，避免测试自己写死一份（改了密码也不用改测试） */
+const pick = (re, src) => (src.match(re) || [])[1];
+const PASS_VALUE = pick(/var PASS = '([^']*)'/, SCRIPT);
+const USER_VALUE = pick(/var USER = '([^']*)'/, SCRIPT);
+const SHOWN_PWD = pick(/密码：<\/span><b>([^<]+)<\/b>/, html);
+const SHOWN_USER = pick(/用户名：<\/span><b>([^<]+)<\/b>/, html);
+const COPY_VALUES = [...html.matchAll(/data-copy="([^"]+)"/g)].map((x) => x[1]);
+
 /* ---------------- DOM 桩 ---------------- */
 function makeClassList() {
   const set = new Set();
@@ -104,28 +112,45 @@ function buildPage() {
 
   const location = { protocol: 'file:', href: 'file:///index.html' };
 
+  // 复制按钮：从真实标记里解析 data-copy，顺带验证按钮确实是 type="button"
+  const copyValues = [...html.matchAll(/data-copy="([^"]+)"/g)].map((mm) => mm[1]);
+  const copyBtns = copyValues.map((v, i) => {
+    const b = makeEl('cred-copy-' + i);
+    b.textContent = '复制';
+    b._attrs = { 'data-copy': v };
+    b.getAttribute = (k) => (k in b._attrs ? b._attrs[k] : null);
+    return b;
+  });
+  const clipboard = {
+    writes: [],
+    writeText(t) { this.writes.push(t); return Promise.resolve(); },
+  };
+
   const sandbox = {
     console, Math, Date, JSON, Array, Object, String, Number, Error, Promise, RegExp,
     setTimeout: (fn) => { if (typeof fn === 'function') fn(); return 0; },
     clearTimeout() {},
-    window: { devicePixelRatio: 1 },
+    window: { devicePixelRatio: 1, isSecureContext: true },
     location,
+    navigator: { clipboard },
     sessionStorage: { _d: {}, setItem(k, v) { this._d[k] = v; }, getItem(k) { return this._d[k] || null; } },
     fetch: undefined,
     document: {
+      body: { appendChild() {}, removeChild() {} },
+      createElement: (tag) => makeEl(tag),
       getElementById: (id) => ids[id] || null,
       querySelector: (sel) => {
         const mm = sel.match(/^#(\w+)\s+\.err-text$/);
         return mm ? errText[mm[1]] || null : null;
       },
-      querySelectorAll: () => [],
+      querySelectorAll: (sel) => (sel === '.cred-copy' ? copyBtns : []),
       addEventListener() {},
     },
   };
   sandbox.window.devicePixelRatio = 1;
   vm.createContext(sandbox);
   vm.runInContext(SCRIPT, sandbox);
-  return { ids, errText, formItems, ctx, location, sandbox };
+  return { ids, errText, formItems, ctx, location, sandbox, copyBtns, clipboard };
 }
 
 /* ---------------- 用例 ---------------- */
@@ -163,23 +188,23 @@ let page = buildPage();
 const shown = page.ctx.drawn.join('');
 console.log('  当前验证码：' + shown + '\n');
 
-check('原样输入 → 登录成功', submit(page, 'UiBot', 'Pass_123', shown).navigated,
+check('原样输入 → 登录成功', submit(page, 'UiBot', PASS_VALUE, shown).navigated,
   '期望跳转 app.html');
 
 page = buildPage();
 const shown2 = page.ctx.drawn.join('');
-check('全大写输入 → 登录成功', submit(page, 'UiBot', 'Pass_123', shown2.toUpperCase()).navigated,
+check('全大写输入 → 登录成功', submit(page, 'UiBot', PASS_VALUE, shown2.toUpperCase()).navigated,
   '验证码=' + shown2 + '，输入=' + shown2.toUpperCase());
 
 page = buildPage();
 const shown3 = page.ctx.drawn.join('');
-check('全小写输入 → 登录成功', submit(page, 'UiBot', 'Pass_123', shown3.toLowerCase()).navigated,
+check('全小写输入 → 登录成功', submit(page, 'UiBot', PASS_VALUE, shown3.toLowerCase()).navigated,
   '验证码=' + shown3 + '，输入=' + shown3.toLowerCase());
 
 page = buildPage();
 const shown4 = page.ctx.drawn.join('');
 const wrong = shown4 === 'ZZZZ' ? 'YYYY' : 'ZZZZ';
-const r4 = submit(page, 'UiBot', 'Pass_123', wrong);
+const r4 = submit(page, 'UiBot', PASS_VALUE, wrong);
 check('验证码填错 → 提示验证码有误', !r4.navigated && /验证码有误/.test(r4.codeErr),
   '提示=' + r4.codeErr);
 
@@ -190,8 +215,39 @@ check('密码填错 → 提示账号不正确', !r5.navigated && /用户名或�
   '提示=' + r5.userErr);
 
 page = buildPage();
-const r6 = submit(page, '', 'Pass_123', '');
+const r6 = submit(page, '', PASS_VALUE, '');
 check('留空 → 不跳转且报错', !r6.navigated);
+
+console.log('\n一键复制：');
+
+page = buildPage();
+check('复制按钮共 2 个', page.copyBtns.length === 2, '实际 ' + page.copyBtns.length);
+check('按钮是 type="button"（不触发表单提交）',
+  (html.match(/<button type="button" class="cred-copy"/g) || []).length === 2);
+
+page.copyBtns[0]._handlers.click[0]();
+check('点第 1 个 → 复制的值等于显示的用户名',
+  page.clipboard.writes[0] === SHOWN_USER && SHOWN_USER === USER_VALUE,
+  '写入=' + page.clipboard.writes[0] + '，显示=' + SHOWN_USER);
+
+page.copyBtns[1]._handlers.click[0]();
+check('点第 2 个 → 复制的值等于显示的密码',
+  page.clipboard.writes[1] === SHOWN_PWD && SHOWN_PWD === PASS_VALUE,
+  '写入=' + page.clipboard.writes[1] + '，显示=' + SHOWN_PWD);
+
+console.log('\n凭据一致性：');
+
+const serverSrc = fs.readFileSync(path.join(__dirname, 'server.py'), 'utf8');
+const srvPwd = pick(/"UiBot":\s*"([^"]+)"/, serverSrc);
+const srvUser = pick(/"([^"]+)":\s*"Pass_/, serverSrc);
+
+check('密码四处一致（显示 / PASS 常量 / data-copy / 服务端）',
+  !!SHOWN_PWD && PASS_VALUE === SHOWN_PWD && COPY_VALUES[1] === SHOWN_PWD && srvPwd === SHOWN_PWD,
+  `显示=${SHOWN_PWD} 常量=${PASS_VALUE} 按钮=${COPY_VALUES[1]} 服务端=${srvPwd}`);
+
+check('用户名四处一致（显示 / USER 常量 / data-copy / 服务端）',
+  !!SHOWN_USER && USER_VALUE === SHOWN_USER && COPY_VALUES[0] === SHOWN_USER && srvUser === SHOWN_USER,
+  `显示=${SHOWN_USER} 常量=${USER_VALUE} 按钮=${COPY_VALUES[0]} 服务端=${srvUser}`);
 
 console.log('\n通过 ' + pass + ' 项，失败 ' + fail + ' 项');
 process.exit(fail ? 1 : 0);
