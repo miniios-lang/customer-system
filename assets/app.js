@@ -15,6 +15,8 @@
   var VIEWS = {
     stock: {
       title: '库存',
+      /* 全量展示：40 条库存一次铺在同一页里，不分页 */
+      all: true,
       rows: function () { return Data.goods; },
       cols: [
         { key: 'name',  title: '货名',     width: 300, align: 'left' },
@@ -140,9 +142,15 @@
     return rows;
   }
 
+  function pageSize() {
+    return VIEWS[state.view].all ? 0 : PAGE;   /* 0 表示不分页 */
+  }
+
   function pageRows(rows) {
-    var start = (state.page - 1) * PAGE;
-    return rows.slice(start, start + PAGE);
+    var size = pageSize();
+    if (!size) return rows.slice();
+    var start = (state.page - 1) * size;
+    return rows.slice(start, start + size);
   }
 
   function selectedRows() {
@@ -329,7 +337,17 @@
   /* ---------------- 渲染：分页 ---------------- */
   function renderPager(rows) {
     var total = rows.length;
-    var pages = Math.max(1, Math.ceil(total / PAGE));
+    var size = pageSize();
+
+    if (!size) {
+      $('pager').innerHTML = '';
+      $('pager').style.display = 'none';
+      $('pageInfo').textContent = '共 ' + total + ' 条 · 全部展示';
+      return;
+    }
+    $('pager').style.display = '';
+
+    var pages = Math.max(1, Math.ceil(total / size));
     if (state.page > pages) state.page = pages;
 
     $('pager').innerHTML =
@@ -338,7 +356,7 @@
       '<span class="pg-total">/ ' + pages + '</span>' +
       '<span class="pg-link' + (state.page >= pages ? ' disabled' : '') + '" data-go="next">下一页</span>';
 
-    $('pageInfo').textContent = '共 ' + total + ' 条 · 每页 ' + PAGE + ' 条';
+    $('pageInfo').textContent = '共 ' + total + ' 条 · 每页 ' + size + ' 条';
 
     Array.prototype.forEach.call($('pager').querySelectorAll('.pg-link'), function (el) {
       el.addEventListener('click', function () {
@@ -371,7 +389,8 @@
     state.view = view;
     state.page = 1;
     state.sort = { key: '', dir: 1 };
-    state.filter = {};
+    /* 订单页默认只看当天（与日期选择器里「今天」指向同一天） */
+    state.filter = view === 'orders' ? { from: Data.today, to: Data.today } : {};
     renderMenu();
     renderFilters();
     paintDateInputs();
