@@ -98,8 +98,8 @@ ok('已无「商品码」旧文案', appJs.indexOf("'商品码'") < 0);
 ok('页面不再把日期转成点号', appJs.indexOf("replace(/-/g, '.')") < 0);
 ok('表格/导出统一走 dateText', appJs.indexOf('dateText') > 0);
 ok('库存视图设为不分页', appJs.indexOf('all: true') > 0);
-ok('订单默认筛选当天',
-   appJs.indexOf('from: Data.today') > 0 && appJs.indexOf('to: Data.today') > 0);
+ok('订单进入时不做默认日期筛选',
+   appJs.indexOf('from: Data.today') < 0 && appJs.indexOf('state.filter = {}') > 0);
 ok('库存计数文案为全量展示', appJs.indexOf('全部展示') > 0);
 
 /* 9.1 表头吸顶 */

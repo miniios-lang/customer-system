@@ -389,8 +389,8 @@
     state.view = view;
     state.page = 1;
     state.sort = { key: '', dir: 1 };
-    /* 订单页默认只看当天（与日期选择器里「今天」指向同一天） */
-    state.filter = view === 'orders' ? { from: Data.today, to: Data.today } : {};
+    /* 订单页不做默认筛选：进入即是全量，日期留空 */
+    state.filter = {};
     renderMenu();
     renderFilters();
     paintDateInputs();
