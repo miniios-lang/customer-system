@@ -95,7 +95,8 @@
   function money(n) {
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
-  function dotDate(iso) { return iso ? iso.replace(/-/g, '.') : ''; }
+  /* 日期统一按 ISO 展示：2021-12-30（数据层、表格、导出三处同一写法） */
+  function dateText(iso) { return iso || ''; }
   function stamp() {
     var d = new Date();
     return '' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
@@ -230,7 +231,7 @@
     ['from', 'to'].forEach(function (k) {
       var el = $(dateInputId(k));
       if (!el) return;
-      el.value = state.filter[k] ? dotDate(state.filter[k]) : '';
+      el.value = dateText(state.filter[k]);
       el.classList.toggle('has-value', !!state.filter[k]);
       el.classList.remove('is-bad');
     });
@@ -301,7 +302,7 @@
       var tds = cols.map(function (c) {
         var raw = v.value(r, c.key);
         var text;
-        if (c.date) text = dotDate(raw);
+        if (c.date) text = dateText(raw);
         else if (c.num) text = money(raw);
         else text = raw;
         var cls = c.align === 'right' ? 'r' : (c.align === 'center' ? 'c' : 'l');
@@ -736,7 +737,7 @@
     var data = rows.map(function (r) {
       return cols.map(function (c) {
         var val = v.value(r, c.key);
-        return c.date ? dotDate(val) : val;
+        return c.date ? dateText(val) : val;
       });
     });
     var sheetName = v.title;

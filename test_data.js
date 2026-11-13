@@ -20,7 +20,9 @@ const goodsByCode = new Map(goods.map(g => [g.code, g]));
 const custCodes = new Set(customers.map(c => c.code));
 
 /* 1. 数据量 */
-ok('订单条数 >= 300', orders.length >= 300, '实际 ' + orders.length + ' 条');
+ok('订单条数 = 1000（正好 100 页）', orders.length === 1000, '实际 ' + orders.length + ' 条');
+ok('1000 % 10 = 0，末页不含空行', orders.length % 10 === 0,
+   '共 ' + (orders.length / 10) + ' 页，每页 10 条');
 ok('商品条数 = 40', goods.length === 40, '实际 ' + goods.length + ' 个');
 
 /* 2. 商品编码唯一且格式统一 */
@@ -34,7 +36,7 @@ ok('商品编码格式均为 SP+6 位数字', codes.every(c => /^SP\d{6}$/.test(
 const missGoods = orders.filter(o => !goodsByCode.has(o.goodsCode));
 ok('订单商品编码全部存在于库存', missGoods.length === 0,
    missGoods.length ? '失配 ' + missGoods.length + ' 单，如 ' + missGoods[0].goodsCode
-                    : '480/480 命中');
+                    : orders.length + '/' + orders.length + ' 命中');
 
 const missCust = orders.filter(o => !custCodes.has(o.custCode));
 ok('订单客户编码全部存在于客户表', missCust.length === 0,
@@ -74,10 +76,27 @@ ok('下单日期均在 2021 年内',
 ok('订单按日期倒序排列',
    orders.every((o, i) => i === 0 || orders[i - 1].date >= o.date));
 
+/* 8.1 日期分隔符统一为 "-" */
+const isoBad = orders.filter(o => !/^\d{4}-\d{2}-\d{2}$/.test(o.date));
+ok('下单日期统一为 YYYY-MM-DD', isoBad.length === 0,
+   isoBad.length ? '异常 ' + isoBad.length + ' 条，如 ' + isoBad[0].date
+                 : orders.length + '/' + orders.length + ' 合规');
+
+/* 8.2 按天均匀铺满全年 */
+const byDay = {};
+orders.forEach(o => { byDay[o.date] = (byDay[o.date] || 0) + 1; });
+const dayCounts = Object.values(byDay);
+ok('订单覆盖全年 365 天', dayCounts.length === 365, '覆盖 ' + dayCounts.length + ' 天');
+ok('每日单量差距不超过 1（分布均匀）',
+   Math.max(...dayCounts) - Math.min(...dayCounts) <= 1,
+   Math.min(...dayCounts) + ' ~ ' + Math.max(...dayCounts) + ' 单/天');
+
 /* 9. 表头文案 */
 const appJs = fs.readFileSync(path.join(__dirname, 'assets/app.js'), 'utf8');
 ok('订单表头已改为「商品编码」', /goodsCode', title: '商品编码'/.test(appJs));
 ok('已无「商品码」旧文案', appJs.indexOf("'商品码'") < 0);
+ok('页面不再把日期转成点号', appJs.indexOf("replace(/-/g, '.')") < 0);
+ok('表格/导出统一走 dateText', appJs.indexOf('dateText') > 0);
 
 /* 10. 数据多样性 */
 const months = new Set(orders.map(o => o.date.slice(5, 7)));

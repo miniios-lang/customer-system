@@ -1,7 +1,7 @@
 /* 演示数据（固定种子，每次刷新一致）
    结构对齐参考图：
    库存 = 货名 / 商品编码 / 数量 / 商品价格
-   订单 = 订单编码 / 下单日期(2021.MM.DD) / 商品编码 / 客户编码 / 下单数量
+   订单 = 订单编码 / 下单日期(2021-MM-DD) / 商品编码 / 客户编码 / 下单数量
    客户 = 客户名称 / 客户编码 / 移动号码 / 所在行业 / 公司网址
 
    订单里的 goodsCode / custCode 全部直接取自 goods / customers 数组，
@@ -65,12 +65,31 @@
   }
 
   /* ---------- 订单 ---------- */
-  var ORDER_TOTAL = 480;
-  var MONTH_WEIGHT = [6, 5, 8, 7, 7, 8, 6, 7, 9, 10, 15, 12];  /* 年末旺季单量更高 */
+  /* 正好 1000 条 = 100 页 × 每页 10 条，不多不少，
+     最后一页也是满的，不会出现半页或空白页。 */
+  var ORDER_TOTAL = 1000;
+
+  /* 2021 年 365 天，每天 2~3 单：1000 / 365 = 2 余 270，
+     余下的 270 单用累加器均匀插到全年，保证日期间隔平整、不扎堆。 */
+  var DAYS = [];
+  for (var dm = 1; dm <= 12; dm++) {
+    var dim = new Date(2021, dm, 0).getDate();
+    for (var dd = 1; dd <= dim; dd++) DAYS.push('2021-' + pad2(dm) + '-' + pad2(dd));
+  }
+  var BASE = Math.floor(ORDER_TOTAL / DAYS.length);
+  var REM = ORDER_TOTAL - BASE * DAYS.length;
+  var acc = 0;
+  var perDay = DAYS.map(function () {
+    if (!REM) return BASE;
+    acc += REM;
+    if (acc >= DAYS.length) { acc -= DAYS.length; return BASE + 1; }
+    return BASE;
+  });
 
   var usedQty = {};       /* 每个商品已被下单的数量，用于不超过库存 */
   var seqByDate = {};     /* 同一天内的流水号，保证订单编码不重复 */
   var orders = [];
+
   goods.forEach(function (g) { usedQty[g.code] = 0; });
 
   /* 主推款：前 8 个商品被下单的概率明显更高，数据才不像均匀随机 */
@@ -85,17 +104,6 @@
     return g;
   }
 
-  function pickMonth() {
-    var total = 0, i;
-    for (i = 0; i < 12; i++) total += MONTH_WEIGHT[i];
-    var x = rnd() * total;
-    for (i = 0; i < 12; i++) {
-      x -= MONTH_WEIGHT[i];
-      if (x <= 0) return i + 1;
-    }
-    return 12;
-  }
-
   function pickQty() {
     var r = rnd();
     if (r < 0.55) return int(1, 10);
@@ -103,36 +111,34 @@
     return int(31, 80);
   }
 
-  for (var oi = 0; oi < ORDER_TOTAL; oi++) {
-    /* 前 40 单按顺序铺满商品与客户，保证每个商品、每个客户都至少出现在订单里 */
-    var fixedGoods = oi < goods.length ? goods[oi] : null;
-    var g = takeGoods(fixedGoods);
-    var c = oi < customers.length ? customers[oi] : pick(customers);
-
-    var month = pickMonth();
-    var maxDay = new Date(2021, month, 0).getDate();
-    var day = int(1, month === 12 ? 30 : maxDay);
-    var iso = '2021-' + pad2(month) + '-' + pad2(day);
+  var seq = 0;
+  DAYS.forEach(function (iso, di) {
     var dk = iso.replace(/-/g, '');
+    for (var k = 0; k < perDay[di]; k++) {
+      /* 前 40 单按顺序铺满商品与客户，保证每个商品、每个客户都至少出现在订单里 */
+      var g = takeGoods(seq < goods.length ? goods[seq] : null);
+      var c = seq < customers.length ? customers[seq] : pick(customers);
 
-    seqByDate[dk] = (seqByDate[dk] || 0) + 1;
+      seqByDate[dk] = (seqByDate[dk] || 0) + 1;
 
-    var room = g.qty - usedQty[g.code];
-    var qty = Math.min(pickQty(), room);
-    usedQty[g.code] += qty;
+      var room = g.qty - usedQty[g.code];
+      var qty = Math.min(pickQty(), room);
+      usedQty[g.code] += qty;
 
-    orders.push({
-      id: oi + 1,
-      orderNo: 'DD' + dk + pad4(seqByDate[dk]),
-      date: iso,
-      goodsCode: g.code,
-      goodsName: g.name,
-      custCode: c.code,
-      custName: c.name,
-      qty: qty,
-      price: g.price
-    });
-  }
+      seq += 1;
+      orders.push({
+        id: seq,
+        orderNo: 'DD' + dk + pad4(seqByDate[dk]),
+        date: iso,
+        goodsCode: g.code,
+        goodsName: g.name,
+        custCode: c.code,
+        custName: c.name,
+        qty: qty,
+        price: g.price
+      });
+    }
+  });
 
   orders.forEach(function (o) { o.amount = o.qty * o.price; });
 
