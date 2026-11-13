@@ -392,7 +392,10 @@
       return;
     }
 
-    if (c !== code) { fail('验证码有误，请重新输入'); return; }
+    /* 真站验证码大小写不敏感，服务端也是按大写比对。
+       输入框拿到的是 toUpperCase 后的值，所以这里必须把本地码同样转大写再比 ——
+       字符池含小写字母，直接用原始 code 比较会让正确答案也判错。 */
+    if (c !== code.toUpperCase()) { fail('验证码有误，请重新输入'); return; }
     if (u !== USER || p !== PASS) {
       setErr('fUser', true);
       setErr('fPwd', true);
