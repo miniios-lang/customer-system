@@ -102,6 +102,14 @@ ok('订单默认筛选当天',
    appJs.indexOf('from: Data.today') > 0 && appJs.indexOf('to: Data.today') > 0);
 ok('库存计数文案为全量展示', appJs.indexOf('全部展示') > 0);
 
+/* 9.1 表头吸顶 */
+const styleCss = fs.readFileSync(path.join(__dirname, 'assets/style.css'), 'utf8');
+ok('表头吸顶 position: sticky', styleCss.indexOf('position: sticky') > 0);
+ok('表头底线改用 inset 阴影（collapse 下吸顶不掉线）',
+   styleCss.indexOf('box-shadow: inset 0 -1px 0 var(--border)') > 0);
+ok('th 不再依赖 border-bottom',
+   !/table\.grid th\s*\{[^}]*border-bottom:\s*1px/.test(styleCss));
+
 /* 10. 数据多样性 */
 const months = new Set(orders.map(o => o.date.slice(5, 7)));
 const qtys = orders.map(o => o.qty);
