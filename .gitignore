@@ -1,0 +1,13 @@
+# 依赖与环境
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# 打包产物
+dist/
+dist.zip
+
+# 编辑器
+.vscode/
+.idea/

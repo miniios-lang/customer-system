@@ -1,0 +1,15 @@
+# Cloudflare Pages 部署配置
+# 用法：npx wrangler pages deploy dist --project-name customer-system
+#
+# 本项目是纯静态产物，没有构建步骤：pack_deploy.py 已经把所有东西放进 dist/，
+# 所以这里只声明输出目录，不配置 build command。
+
+name = "customer-system"
+
+# 静态产物目录（pack_deploy.py 生成）
+pages_build_output_dir = "dist"
+
+compatibility_date = "2026-11-01"
+
+# 纯静态站点不需要 Functions / KV / D1，
+# server.py 是本机练习用的接口仿真服务，不参与任何线上部署。
